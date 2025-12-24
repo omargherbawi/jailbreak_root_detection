@@ -1,17 +1,25 @@
-cmake_minimum_required(VERSION 3.18.1)
+cmake_minimum_required(VERSION 3.22.1)
 
-project("jailbreak_root_detection")
+project("toolChecker" C CXX ASM)
 
-set(can_use_assembler TRUE)
+# Use clang toolchain only, avoid deprecated flags
+set(CMAKE_C_COMPILER_LAUNCHER "")
+set(CMAKE_CXX_COMPILER_LAUNCHER "")
 
+# Enable ASM language support
 enable_language(ASM)
 
-add_library(antifrida SHARED syscall.S antifrida.cpp)
+# Build shared library named toolChecker
+add_library(toolChecker SHARED
+    syscall.S
+    antifrida.cpp
+)
 
+# Find and link log library
 find_library(log-lib log)
 
-target_link_libraries(antifrida ${log-lib})
+target_link_libraries(toolChecker ${log-lib})
 
-# Support for 16 KB page sizes (required for Google Play Store)
-# This ensures the library is aligned for 16KB page sizes (also compatible with 4KB)
-set(CMAKE_ANDROID_PAGE_SIZE 16384)
+# Set C++ standard
+set_property(TARGET toolChecker PROPERTY CXX_STANDARD 11)
+set_property(TARGET toolChecker PROPERTY CXX_STANDARD_REQUIRED ON)

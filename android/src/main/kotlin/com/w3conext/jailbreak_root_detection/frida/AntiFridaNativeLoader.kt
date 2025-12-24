@@ -15,7 +15,7 @@ object AntiFridaNativeLoader {
 
     init {
         try {
-            System.loadLibrary("antifrida")
+            System.loadLibrary("toolChecker")
         } catch (e: Exception) {
             print(e)
         }

@@ -69,9 +69,15 @@ int read_pseudo_file_at(const char *path, char **buf_ptr, size_t *buf_size_ptr,
     while (true) {
         if (total_read_size >= buf_size) {
             /* linear size growth
-             * buf_size grow ~4k bytes each time, 32 bytes for zero padding
+             * buf_size grows by page size each time, 32 bytes for zero padding
+             * Use sysconf to get actual page size (supports 4KB, 16KB, etc.)
              * */
-            buf_size = (total_read_size | 4095) + 4097 - 32;
+            long page_size = sysconf(_SC_PAGESIZE);
+            if (page_size <= 0) {
+                page_size = 4096; // Fallback to 4KB if sysconf fails
+            }
+            long page_mask = page_size - 1;
+            buf_size = ((total_read_size | page_mask) + page_size + 1) - 32;
             buf = (char *) realloc(buf, buf_size);
             if (!buf) {
                 close(fd);
